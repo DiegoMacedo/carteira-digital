@@ -19,13 +19,17 @@ public class ContaService {
     }
 
     public Double depositar(Long id, Double valor) {
-        if (valor == null || valor <= 0) {
-            throw new IllegalArgumentException("O valor do depósito deve ser maior que zero.");
-        }
+        validarValorPositivo(valor);
         Conta conta = buscarContaPorId(id);
         conta.setSaldo(conta.getSaldo() + valor);
         contaRepository.save(conta);
         return conta.getSaldo();
+    }
+
+    private void validarValorPositivo(Double valor) {
+        if (valor == null || valor <= 0) {
+            throw new IllegalArgumentException("O valor da operação deve ser maior que zero.");
+        }
     }
 
     private Conta buscarContaPorId(Long id) {
