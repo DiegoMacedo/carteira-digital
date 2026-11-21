@@ -15,11 +15,11 @@ public class ContaService {
     }
 
     public Double consultarSaldo(Long id) {
-        Optional<Conta> contaOptional = contaRepository.findById(id);
-        if (contaOptional.isEmpty()) {
-            throw new IllegalArgumentException("Conta não encontrada para o ID: " + id);
+        return buscarContaPorId(id).getSaldo();
+    }
 
-        }
-        return contaOptional.get().getSaldo();
+    private Conta buscarContaPorId(Long id) {
+        return contaRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada para o ID: " + id));
     }
 }
