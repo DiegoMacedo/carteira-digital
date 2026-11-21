@@ -75,7 +75,7 @@ public class ContaServiceTest {
     @Test
     @DisplayName("Deve lançar IllegalArgumentException ao depositar valor nulo")
     void deveLancarExceptionAoDepositarValorNulo() {
-        assertThrows(IllegalFormatException.class, () -> contaService.depositar(1L, null));
+        assertThrows(IllegalArgumentException.class, () -> contaService.depositar(1L, null));
         verifyNoInteractions(contaRepository);
     }
 }
