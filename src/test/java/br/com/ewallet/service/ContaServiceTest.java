@@ -9,6 +9,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.IllegalFormatException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,6 +42,41 @@ public class ContaServiceTest {
 
         assertThrows(IllegalArgumentException.class, () -> contaService.consultarSaldo(99L));
         verify(contaRepository, times(1)).findById(99L);
+    }
+
+    @Test
+    @DisplayName("Deve realizar depósito com sucesso e atualizar o saldo")
+    void deveRealizarDepositoComSucesso() {
+        Conta conta = new Conta(1L, "Diego", 1000.0);
+        when(contaRepository.findById(1L)).thenReturn(Optional.of(conta));
+
+        Double novoSaldo = contaService.depositar(1L, 500.0);
+
+        assertEquals(1500.0, novoSaldo, 0.001);
+        assertEquals(1500.0, conta.getSaldo(), 0.001);
+        verify(contaRepository, times(1)).findById(1L);
+        verify(contaRepository, times(1)).save(conta);
+    }
+
+    @Test
+    @DisplayName("Deve lançar IllegalArgumentException ao depositar valor igual a zero")
+    void deveLancarExcecaoAoDepositarValorZero() {
+        assertThrows(IllegalArgumentException.class, () -> contaService.depositar(1L, 0.0));
+        verifyNoInteractions(contaRepository);
+    }
+
+    @Test
+    @DisplayName("Deve lançar IllegalArgumentException ao depositar valor negativo")
+    void deveLancarExcecaoAoDepositarValorNegativo() {
+        assertThrows(IllegalArgumentException.class, () -> contaService.depositar(1L, -100.0));
+        verify(contaRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar IllegalArgumentException ao depositar valor nulo")
+    void deveLancarExceptionAoDepositarValorNulo() {
+        assertThrows(IllegalFormatException.class, () -> contaService.depositar(1L, null));
+        verifyNoInteractions(contaRepository);
     }
 }
 
