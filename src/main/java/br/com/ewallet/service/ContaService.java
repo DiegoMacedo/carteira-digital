@@ -18,6 +18,16 @@ public class ContaService {
         return buscarContaPorId(id).getSaldo();
     }
 
+    public Double depositar(Long id, Double valor) {
+        if (valor == null || valor <= 0) {
+            throw new IllegalArgumentException("O valor do depósito deve ser maior que zero.");
+        }
+        Conta conta = buscarContaPorId(id);
+        conta.setSaldo(conta.getSaldo() + valor);
+        contaRepository.save(conta);
+        return conta.getSaldo();
+    }
+
     private Conta buscarContaPorId(Long id) {
         return contaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Conta não encontrada para o ID: " + id));
