@@ -88,7 +88,7 @@ public class ContaServiceTest {
         when(contaRepository.findById(1L)).thenReturn(Optional.of(contaOrigem));
         when(contaRepository.findById(2L)).thenReturn(Optional.of(contaDestino));
 
-        contaService.tranferir(1L, 2L, 300.0);
+        contaService.transferir(1L, 2L, 300.0);
 
         assertEquals(700.0, contaOrigem.getSaldo(), 0.001);
         assertEquals(800.0, contaDestino.getSaldo(), 0.001);
@@ -113,7 +113,7 @@ public class ContaServiceTest {
     @Test
     @DisplayName("Deve lançar IllegalArgumentException ao transferir valor inválido")
     void deveLancarExcecaoAoTransferirValorInvalido() {
-        assertThrows(IllegalArgumentException.class, () -> contaService.transferir(1L, 2L, -50));
+        assertThrows(IllegalArgumentException.class, () -> contaService.transferir(1L, 2L, -50.0));
         verifyNoInteractions(contaRepository);
     }
 
@@ -124,7 +124,7 @@ public class ContaServiceTest {
         when(contaRepository.findById(1L)).thenReturn(Optional.of(contaOrigem));
         when(contaRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(IllegalFormatException.class, () -> contaService.tranferir(1L, 99L, 100.0));
+        assertThrows(IllegalArgumentException.class, () -> contaService.transferir(1L, 99L, 100.0));
         verify(contaRepository, never()).save(any());
     }
 
