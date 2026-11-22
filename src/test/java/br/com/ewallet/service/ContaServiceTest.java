@@ -1,5 +1,6 @@
 package br.com.ewallet.service;
 
+import br.com.ewallet.exception.SaldoInsuficienteException;
 import br.com.ewallet.model.Conta;
 import br.com.ewallet.repository.ContaRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -78,5 +79,54 @@ public class ContaServiceTest {
         assertThrows(IllegalArgumentException.class, () -> contaService.depositar(1L, null));
         verifyNoInteractions(contaRepository);
     }
+
+    @Test
+    @DisplayName("Deve realizar transferência com sucesso entre duas contas")
+    void deveRealizarTransferenciaComSucesso() {
+        Conta contaOrigem = new Conta(1L, "Diego", 1000.0);
+        Conta contaDestino = new Conta(2L, "Esther", 500.0);
+        when(contaRepository.findById(1L)).thenReturn(Optional.of(contaOrigem));
+        when(contaRepository.findById(2L)).thenReturn(Optional.of(contaDestino));
+
+        contaService.tranferir(1L, 2L, 300.0);
+
+        assertEquals(700.0, contaOrigem.getSaldo(), 0.001);
+        assertEquals(800.0, contaDestino.getSaldo(), 0.001);
+        verify(contaRepository, times(1)).save(contaOrigem);
+        verify(contaRepository, times(1)).save(contaDestino);
+    }
+
+    @Test
+    @DisplayName("Deve lançar SaldoInsuficienteException quando o saldo da conta de origem for insuficiente")
+    void deveLancarSaldoInsuficienteExceptionNaTransferencia() {
+        Conta contaOrigem = new Conta(1L, "Diego", 200.0);
+        Conta contaDestino = new Conta(2L, "Esther", 500.0);
+        when(contaRepository.findById(1L)).thenReturn(Optional.of(contaOrigem));
+        when(contaRepository.findById(2L)).thenReturn(Optional.of(contaDestino));
+
+        assertThrows(SaldoInsuficienteException.class, () -> contaService.transferir(1L, 2L, 300.0));
+        assertEquals(200.0, contaOrigem.getSaldo(), 0.001);
+        assertEquals(500.0, contaDestino.getSaldo(), 0.001);
+        verify(contaRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Deve lançar IllegalArgumentException ao transferir valor inválido")
+    void deveLancarExcecaoAoTransferirValorInvalido() {
+        assertThrows(IllegalArgumentException.class, () -> contaService.transferir(1L, 2L, -50));
+        verifyNoInteractions(contaRepository);
+    }
+
+    @Test
+    @DisplayName("Deve lançar IllegalArgumentException ao transferir para conta de destino inexistente")
+    void deveLancarExcecaoAoTransferirParaContaInexistente() {
+        Conta contaOrigem = new Conta(1L, "Diego", 1000.0);
+        when(contaRepository.findById(1L)).thenReturn(Optional.of(contaOrigem));
+        when(contaRepository.findById(99L)).thenReturn(Optional.empty());
+
+        assertThrows(IllegalFormatException.class, () -> contaService.tranferir(1L, 99L, 100.0));
+        verify(contaRepository, never()).save(any());
+    }
+
 }
 
