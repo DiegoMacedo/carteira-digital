@@ -32,19 +32,27 @@ public class ContaService {
         Conta contaOrigem = buscarContaPorId(idOrigem);
         Conta contaDestino = buscarContaPorId(idDestino);
 
-        if (contaOrigem.getSaldo() < valor) {
-            throw new SaldoInsuficienteException("Saldo insuficiente na conta de origem.");
-        }
-        contaOrigem.setSaldo(contaOrigem.getSaldo() - valor);
-        contaDestino.setSaldo(contaDestino.getSaldo() + valor);
-        contaRepository.save(contaOrigem);
-        contaRepository.save(contaDestino);
+        validarSaldoSuficiente(contaOrigem, valor);
+
+        atualizaSaldo(contaOrigem, contaOrigem.getSaldo() - valor);
+        atualizaSaldo(contaDestino, contaDestino.getSaldo() + valor);
     }
 
     private void validarValorPositivo(Double valor) {
         if (valor == null || valor <= 0) {
             throw new IllegalArgumentException("O valor da operação deve ser maior que zero.");
         }
+    }
+
+    private void validarSaldoSuficiente(Conta conta, Double valor) {
+        if (conta.getSaldo() < valor) {
+            throw new SaldoInsuficienteException("Saldo insuficiente na conta de origem.");
+        }
+    }
+
+    private void atualizaSaldo(Conta conta, Double novoSaldo) {
+        conta.setSaldo(novoSaldo);
+        contaRepository.save(conta);
     }
 
     private Conta buscarContaPorId(Long id) {
