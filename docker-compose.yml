@@ -1,0 +1,12 @@
+services:
+  carteira-digital:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: carteira-digital:1.0.0
+    container_name: carteira-digital
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
